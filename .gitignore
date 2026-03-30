@@ -1,0 +1,24 @@
+# General
+.DS_Store
+.env
+.env.local
+node_modules/
+dist/
+build/
+*.log
+
+# Backend (Java/Maven)
+target/
+*.class
+*.jar
+*.war
+*.ear
+.mvn/
+.idea/
+.vscode/
+
+# Frontend (React/Vite)
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.eslintcache
