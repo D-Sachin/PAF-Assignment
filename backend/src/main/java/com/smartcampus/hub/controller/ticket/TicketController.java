@@ -1,4 +1,4 @@
-package com.smartcampus.hub.controller;
+package com.smartcampus.hub.controller.ticket;
 
 import com.smartcampus.hub.dto.TicketRequestDTO;
 import com.smartcampus.hub.dto.TicketResponseDTO;
