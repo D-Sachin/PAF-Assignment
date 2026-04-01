@@ -5,6 +5,7 @@ import com.smartcampus.hub.enums.TicketStatus;
 import lombok.*;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Data
 @NoArgsConstructor
@@ -18,5 +19,9 @@ public class TicketResponseDTO {
     private Priority priority;
     private TicketStatus status;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String userName;
+    private String technicianName;
+    private List<AttachmentResponseDTO> attachments;
+    private List<CommentResponseDTO> comments;
 }
