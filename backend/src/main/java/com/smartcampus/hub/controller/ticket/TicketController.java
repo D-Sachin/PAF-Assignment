@@ -1,5 +1,7 @@
 package com.smartcampus.hub.controller.ticket;
 
+import com.smartcampus.hub.dto.AssignTechnicianDTO;
+import com.smartcampus.hub.dto.StatusUpdateDTO;
 import com.smartcampus.hub.dto.TicketRequestDTO;
 import com.smartcampus.hub.dto.TicketResponseDTO;
 import com.smartcampus.hub.enums.Priority;
@@ -41,5 +43,21 @@ public class TicketController {
             @RequestParam(required = false) Priority priority) {
         List<TicketResponseDTO> tickets = ticketService.getTicketsByUserId(userId, status, priority);
         return ResponseEntity.ok(tickets);
+    }
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<TicketResponseDTO> updateTicketStatus(
+            @PathVariable Long id,
+            @Valid @RequestBody StatusUpdateDTO statusUpdateDTO) {
+        TicketResponseDTO updatedTicket = ticketService.updateTicketStatus(id, statusUpdateDTO.getStatus());
+        return ResponseEntity.ok(updatedTicket);
+    }
+
+    @PutMapping("/{id}/assign")
+    public ResponseEntity<TicketResponseDTO> assignTechnician(
+            @PathVariable Long id,
+            @Valid @RequestBody AssignTechnicianDTO assignTechnicianDTO) {
+        TicketResponseDTO updatedTicket = ticketService.assignTechnician(id, assignTechnicianDTO.getTechnicianId());
+        return ResponseEntity.ok(updatedTicket);
     }
 }

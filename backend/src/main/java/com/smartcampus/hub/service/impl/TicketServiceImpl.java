@@ -75,6 +75,57 @@ public class TicketServiceImpl implements TicketService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    @Transactional
+    public TicketResponseDTO updateTicketStatus(Long id, TicketStatus status) {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ticket not found with id: " + id));
+
+        // Basic transition validation
+        if (ticket.getStatus() == TicketStatus.CLOSED || ticket.getStatus() == TicketStatus.REJECTED) {
+            throw new RuntimeException("Cannot change status of a " + ticket.getStatus() + " ticket.");
+        }
+
+        ticket.setStatus(status);
+        Ticket updatedTicket = ticketRepository.save(ticket);
+        return mapToResponseDTO(updatedTicket);
+    }
+
+    @Override
+    @Transactional
+    public TicketResponseDTO assignTechnician(Long id, Long technicianId) {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ticket not found with id: " + id));
+
+        // Get current logged-in user to check if they are ADMIN
+        final String currentEmail;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            currentEmail = ((UserDetails) principal).getUsername();
+        } else {
+            currentEmail = principal.toString();
+        }
+
+        User currentUser = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new RuntimeException("Logged in user not found: " + currentEmail));
+
+        if (!"ADMIN".equalsIgnoreCase(currentUser.getRole())) {
+            throw new RuntimeException("Only Admins can assign technicians.");
+        }
+
+        User technician = userRepository.findById(technicianId)
+                .orElseThrow(() -> new RuntimeException("Technician not found with id: " + technicianId));
+
+        ticket.setTechnician(technician);
+        // Automatically set status to IN_PROGRESS when assigned
+        if (ticket.getStatus() == TicketStatus.OPEN) {
+            ticket.setStatus(TicketStatus.IN_PROGRESS);
+        }
+
+        Ticket savedTicket = ticketRepository.save(ticket);
+        return mapToResponseDTO(savedTicket);
+    }
+
     private Specification<Ticket> getTicketSpecification(Long userId, TicketStatus status, Priority priority) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -100,7 +151,9 @@ public class TicketServiceImpl implements TicketService {
                 .priority(ticket.getPriority())
                 .status(ticket.getStatus())
                 .createdAt(ticket.getCreatedAt())
+                .updatedAt(ticket.getUpdatedAt())
                 .userName(ticket.getUser() != null ? ticket.getUser().getName() : "Unknown")
+                .technicianName(ticket.getTechnician() != null ? ticket.getTechnician().getName() : "Unassigned")
                 .build();
     }
 }
