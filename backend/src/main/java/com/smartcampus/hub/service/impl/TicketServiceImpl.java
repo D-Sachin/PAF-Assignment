@@ -1,23 +1,31 @@
 package com.smartcampus.hub.service.impl;
 
+import com.smartcampus.hub.dto.AttachmentResponseDTO;
 import com.smartcampus.hub.dto.TicketRequestDTO;
 import com.smartcampus.hub.dto.TicketResponseDTO;
 import com.smartcampus.hub.enums.Priority;
 import com.smartcampus.hub.enums.TicketStatus;
+import com.smartcampus.hub.model.Attachment;
 import com.smartcampus.hub.model.Ticket;
 import com.smartcampus.hub.model.User;
+import com.smartcampus.hub.repository.AttachmentRepository;
 import com.smartcampus.hub.repository.TicketRepository;
 import com.smartcampus.hub.repository.UserRepository;
 import com.smartcampus.hub.service.TicketService;
 import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
+import java.nio.file.*;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -126,6 +134,54 @@ public class TicketServiceImpl implements TicketService {
         return mapToResponseDTO(savedTicket);
     }
 
+    @Value("${app.upload.dir}")
+    private String uploadDir;
+
+    private final AttachmentRepository attachmentRepository;
+
+    @Override
+    @Transactional
+    public AttachmentResponseDTO uploadAttachment(Long ticketId, MultipartFile file) {
+        Ticket ticket = ticketRepository.findById(ticketId)
+                .orElseThrow(() -> new RuntimeException("Ticket not found with id: " + ticketId));
+
+        // Check max attachments (3)
+        if (ticket.getAttachments() != null && ticket.getAttachments().size() >= 3) {
+            throw new RuntimeException("Maximum of 3 attachments allowed per ticket.");
+        }
+
+        try {
+            // Ensure upload directory exists
+            Path uploadPath = Paths.get(uploadDir);
+            if (!Files.exists(uploadPath)) {
+                Files.createDirectories(uploadPath);
+            }
+
+            // Save file
+            String fileName = System.currentTimeMillis() + "_" + file.getOriginalFilename();
+            Path filePath = uploadPath.resolve(fileName);
+            Files.copy(file.getInputStream(), filePath, StandardCopyOption.REPLACE_EXISTING);
+
+            // Save attachment record
+            Attachment attachment = Attachment.builder()
+                    .fileName(fileName)
+                    .filePath(filePath.toString())
+                    .ticket(ticket)
+                    .build();
+
+            Attachment savedAttachment = attachmentRepository.save(attachment);
+
+            return AttachmentResponseDTO.builder()
+                    .id(savedAttachment.getId())
+                    .fileName(savedAttachment.getFileName())
+                    .fileUrl("/api/files/uploads/" + savedAttachment.getFileName())
+                    .build();
+
+        } catch (IOException e) {
+            throw new RuntimeException("Could not store file: " + e.getMessage());
+        }
+    }
+
     private Specification<Ticket> getTicketSpecification(Long userId, TicketStatus status, Priority priority) {
         return (root, query, cb) -> {
             List<Predicate> predicates = new ArrayList<>();
@@ -154,6 +210,13 @@ public class TicketServiceImpl implements TicketService {
                 .updatedAt(ticket.getUpdatedAt())
                 .userName(ticket.getUser() != null ? ticket.getUser().getName() : "Unknown")
                 .technicianName(ticket.getTechnician() != null ? ticket.getTechnician().getName() : "Unassigned")
+                .attachments(ticket.getAttachments() != null ? ticket.getAttachments().stream()
+                        .map(att -> AttachmentResponseDTO.builder()
+                                .id(att.getId())
+                                .fileName(att.getFileName())
+                                .fileUrl("/api/files/uploads/" + att.getFileName())
+                                .build())
+                        .collect(Collectors.toList()) : Collections.emptyList())
                 .build();
     }
 }
