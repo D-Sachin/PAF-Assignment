@@ -23,4 +23,5 @@ public class TicketResponseDTO {
     private String userName;
     private String technicianName;
     private List<AttachmentResponseDTO> attachments;
+    private List<CommentResponseDTO> comments;
 }

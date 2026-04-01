@@ -2,6 +2,8 @@ package com.smartcampus.hub.controller.ticket;
 
 import com.smartcampus.hub.dto.AssignTechnicianDTO;
 import com.smartcampus.hub.dto.AttachmentResponseDTO;
+import com.smartcampus.hub.dto.CommentRequestDTO;
+import com.smartcampus.hub.dto.CommentResponseDTO;
 import com.smartcampus.hub.dto.StatusUpdateDTO;
 import com.smartcampus.hub.dto.TicketRequestDTO;
 import com.smartcampus.hub.dto.TicketResponseDTO;
@@ -69,5 +71,13 @@ public class TicketController {
             @RequestParam("file") MultipartFile file) {
         AttachmentResponseDTO response = ticketService.uploadAttachment(id, file);
         return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/comments")
+    public ResponseEntity<List<CommentResponseDTO>> addComment(
+            @PathVariable Long id,
+            @Valid @RequestBody CommentRequestDTO commentRequestDTO) {
+        List<CommentResponseDTO> comments = ticketService.addComment(id, commentRequestDTO);
+        return ResponseEntity.ok(comments);
     }
 }
