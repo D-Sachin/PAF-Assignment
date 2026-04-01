@@ -1,6 +1,9 @@
 package com.smartcampus.hub.controller.ticket;
 
 import com.smartcampus.hub.dto.AssignTechnicianDTO;
+import com.smartcampus.hub.dto.AttachmentResponseDTO;
+import com.smartcampus.hub.dto.CommentRequestDTO;
+import com.smartcampus.hub.dto.CommentResponseDTO;
 import com.smartcampus.hub.dto.StatusUpdateDTO;
 import com.smartcampus.hub.dto.TicketRequestDTO;
 import com.smartcampus.hub.dto.TicketResponseDTO;
@@ -12,6 +15,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -59,5 +63,26 @@ public class TicketController {
             @Valid @RequestBody AssignTechnicianDTO assignTechnicianDTO) {
         TicketResponseDTO updatedTicket = ticketService.assignTechnician(id, assignTechnicianDTO.getTechnicianId());
         return ResponseEntity.ok(updatedTicket);
+    }
+
+    @PutMapping("/{id}/resolution")
+    public ResponseEntity<TicketResponseDTO> updateResolutionNotes(@PathVariable Long id, @RequestBody String notes) {
+        return ResponseEntity.ok(ticketService.updateResolutionNotes(id, notes));
+    }
+
+    @PostMapping("/{id}/attachments")
+    public ResponseEntity<AttachmentResponseDTO> uploadAttachment(
+            @PathVariable Long id,
+            @RequestParam("file") MultipartFile file) {
+        AttachmentResponseDTO response = ticketService.uploadAttachment(id, file);
+        return ResponseEntity.ok(response);
+    }
+
+    @PostMapping("/{id}/comments")
+    public ResponseEntity<List<CommentResponseDTO>> addComment(
+            @PathVariable Long id,
+            @Valid @RequestBody CommentRequestDTO commentRequestDTO) {
+        List<CommentResponseDTO> comments = ticketService.addComment(id, commentRequestDTO);
+        return ResponseEntity.ok(comments);
     }
 }
