@@ -2,17 +2,24 @@ package com.smartcampus.hub.service.impl;
 
 import com.smartcampus.hub.dto.TicketRequestDTO;
 import com.smartcampus.hub.dto.TicketResponseDTO;
+import com.smartcampus.hub.enums.Priority;
 import com.smartcampus.hub.enums.TicketStatus;
 import com.smartcampus.hub.model.Ticket;
 import com.smartcampus.hub.model.User;
 import com.smartcampus.hub.repository.TicketRepository;
 import com.smartcampus.hub.repository.UserRepository;
 import com.smartcampus.hub.service.TicketService;
+import jakarta.persistence.criteria.Predicate;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -50,6 +57,91 @@ public class TicketServiceImpl implements TicketService {
         return mapToResponseDTO(savedTicket);
     }
 
+    @Override
+    @Transactional(readOnly = true)
+    public List<TicketResponseDTO> getAllTickets(TicketStatus status, Priority priority) {
+        Specification<Ticket> spec = getTicketSpecification(null, status, priority);
+        return ticketRepository.findAll(spec).stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional(readOnly = true)
+    public List<TicketResponseDTO> getTicketsByUserId(Long userId, TicketStatus status, Priority priority) {
+        Specification<Ticket> spec = getTicketSpecification(userId, status, priority);
+        return ticketRepository.findAll(spec).stream()
+                .map(this::mapToResponseDTO)
+                .collect(Collectors.toList());
+    }
+
+    @Override
+    @Transactional
+    public TicketResponseDTO updateTicketStatus(Long id, TicketStatus status) {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ticket not found with id: " + id));
+
+        // Basic transition validation
+        if (ticket.getStatus() == TicketStatus.CLOSED || ticket.getStatus() == TicketStatus.REJECTED) {
+            throw new RuntimeException("Cannot change status of a " + ticket.getStatus() + " ticket.");
+        }
+
+        ticket.setStatus(status);
+        Ticket updatedTicket = ticketRepository.save(ticket);
+        return mapToResponseDTO(updatedTicket);
+    }
+
+    @Override
+    @Transactional
+    public TicketResponseDTO assignTechnician(Long id, Long technicianId) {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ticket not found with id: " + id));
+
+        // Get current logged-in user to check if they are ADMIN
+        final String currentEmail;
+        Object principal = SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if (principal instanceof UserDetails) {
+            currentEmail = ((UserDetails) principal).getUsername();
+        } else {
+            currentEmail = principal.toString();
+        }
+
+        User currentUser = userRepository.findByEmail(currentEmail)
+                .orElseThrow(() -> new RuntimeException("Logged in user not found: " + currentEmail));
+
+        if (!"ADMIN".equalsIgnoreCase(currentUser.getRole())) {
+            throw new RuntimeException("Only Admins can assign technicians.");
+        }
+
+        User technician = userRepository.findById(technicianId)
+                .orElseThrow(() -> new RuntimeException("Technician not found with id: " + technicianId));
+
+        ticket.setTechnician(technician);
+        // Automatically set status to IN_PROGRESS when assigned
+        if (ticket.getStatus() == TicketStatus.OPEN) {
+            ticket.setStatus(TicketStatus.IN_PROGRESS);
+        }
+
+        Ticket savedTicket = ticketRepository.save(ticket);
+        return mapToResponseDTO(savedTicket);
+    }
+
+    private Specification<Ticket> getTicketSpecification(Long userId, TicketStatus status, Priority priority) {
+        return (root, query, cb) -> {
+            List<Predicate> predicates = new ArrayList<>();
+            if (userId != null) {
+                predicates.add(cb.equal(root.get("user").get("id"), userId));
+            }
+            if (status != null) {
+                predicates.add(cb.equal(root.get("status"), status));
+            }
+            if (priority != null) {
+                predicates.add(cb.equal(root.get("priority"), priority));
+            }
+            return cb.and(predicates.toArray(new Predicate[0]));
+        };
+    }
+
     private TicketResponseDTO mapToResponseDTO(Ticket ticket) {
         return TicketResponseDTO.builder()
                 .id(ticket.getId())
@@ -59,7 +151,9 @@ public class TicketServiceImpl implements TicketService {
                 .priority(ticket.getPriority())
                 .status(ticket.getStatus())
                 .createdAt(ticket.getCreatedAt())
-                .userName(ticket.getUser().getName())
+                .updatedAt(ticket.getUpdatedAt())
+                .userName(ticket.getUser() != null ? ticket.getUser().getName() : "Unknown")
+                .technicianName(ticket.getTechnician() != null ? ticket.getTechnician().getName() : "Unassigned")
                 .build();
     }
 }

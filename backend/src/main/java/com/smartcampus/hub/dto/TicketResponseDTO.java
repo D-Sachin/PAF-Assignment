@@ -18,5 +18,7 @@ public class TicketResponseDTO {
     private Priority priority;
     private TicketStatus status;
     private LocalDateTime createdAt;
+    private LocalDateTime updatedAt;
     private String userName;
+    private String technicianName;
 }
