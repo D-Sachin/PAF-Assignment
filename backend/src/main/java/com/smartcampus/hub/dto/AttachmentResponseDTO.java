@@ -1,11 +1,14 @@
 package com.smartcampus.hub.dto;
 
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class AttachmentResponseDTO {
     private Long id;
     private String fileName;

@@ -3,12 +3,15 @@ package com.smartcampus.hub.dto;
 import com.smartcampus.hub.enums.Priority;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
 
-@Data
+@Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
-@Builder
 public class TicketRequestDTO {
 
     @NotBlank(message = "Title is required")
