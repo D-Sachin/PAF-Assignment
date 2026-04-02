@@ -3,18 +3,21 @@
 ## 🚀 Fast Track (5 Minutes)
 
 ### Step 1: Build Backend
+
 ```bash
 cd "d:\PAF PROJECT\PAF-Assignment\backend"
 mvn clean install -DskipTests -q
 ```
 
 ### Step 2: Install Frontend
+
 ```bash
 cd "d:\PAF PROJECT\PAF-Assignment\frontend"
 npm install -q
 ```
 
 ### Step 3: Start Backend (Terminal 1)
+
 ```bash
 cd "d:\PAF PROJECT\PAF-Assignment\backend"
 mvn spring-boot:run
@@ -22,6 +25,7 @@ mvn spring-boot:run
 ```
 
 ### Step 4: Start Frontend (Terminal 2)
+
 ```bash
 cd "d:\PAF PROJECT\PAF-Assignment\frontend"
 npm run dev
@@ -29,45 +33,46 @@ npm run dev
 ```
 
 ### Step 5: Open Browser
+
 Go to: **http://localhost:5173**
 
 ---
 
 ## 📋 Command Reference
 
-| Task | Command |
-|------|---------|
-| **Build Backend** | `mvn clean install -DskipTests` |
-| **Run Backend** | `mvn spring-boot:run` |
-| **Build Frontend** | `npm install` |
-| **Dev Server** | `npm run dev` |
-| **Build Production** | `npm run build` |
-| **Test Backend** | `mvn test` |
-| **Test API** | `$PSScriptRoot/TEST_API.ps1` |
-| **Check Java** | `java -version` |
-| **Check Maven** | `mvn -version` |
-| **Check Node** | `node -v && npm -v` |
+| Task                 | Command                         |
+| -------------------- | ------------------------------- |
+| **Build Backend**    | `mvn clean install -DskipTests` |
+| **Run Backend**      | `mvn spring-boot:run`           |
+| **Build Frontend**   | `npm install`                   |
+| **Dev Server**       | `npm run dev`                   |
+| **Build Production** | `npm run build`                 |
+| **Test Backend**     | `mvn test`                      |
+| **Test API**         | `$PSScriptRoot/TEST_API.ps1`    |
+| **Check Java**       | `java -version`                 |
+| **Check Maven**      | `mvn -version`                  |
+| **Check Node**       | `node -v && npm -v`             |
 
 ---
 
 ## 🌐 API Endpoints (Localhost)
 
-| Method | Endpoint | Purpose |
-|--------|----------|---------|
-| **POST** | `/api/member1/resources` | Create resource |
-| **GET** | `/api/member1/resources` | List all (paginated) |
-| **GET** | `/api/member1/resources/{id}` | Get by ID |
-| **GET** | `/api/member1/resources/active` | List active only |
-| **GET** | `/api/member1/resources/search?term=` | Full-text search |
-| **GET** | `/api/member1/resources/advanced-search?...` | Multi-filter search |
-| **GET** | `/api/member1/resources/filter/by-type?type=` | Filter by type |
-| **GET** | `/api/member1/resources/filter/by-location?location=` | Filter by location |
-| **GET** | `/api/member1/resources/filter/by-capacity?capacity=` | Filter by capacity |
-| **GET** | `/api/member1/resources/filter/by-status?status=` | Filter by status |
-| **GET** | `/api/member1/resources/suggestions/locations?prefix=` | Location autocomplete |
-| **PUT** | `/api/member1/resources/{id}` | Update resource |
-| **PATCH** | `/api/member1/resources/{id}/status?status=` | Change status |
-| **DELETE** | `/api/member1/resources/{id}` | Delete resource |
+| Method     | Endpoint                                               | Purpose               |
+| ---------- | ------------------------------------------------------ | --------------------- |
+| **POST**   | `/api/member1/resources`                               | Create resource       |
+| **GET**    | `/api/member1/resources`                               | List all (paginated)  |
+| **GET**    | `/api/member1/resources/{id}`                          | Get by ID             |
+| **GET**    | `/api/member1/resources/active`                        | List active only      |
+| **GET**    | `/api/member1/resources/search?term=`                  | Full-text search      |
+| **GET**    | `/api/member1/resources/advanced-search?...`           | Multi-filter search   |
+| **GET**    | `/api/member1/resources/filter/by-type?type=`          | Filter by type        |
+| **GET**    | `/api/member1/resources/filter/by-location?location=`  | Filter by location    |
+| **GET**    | `/api/member1/resources/filter/by-capacity?capacity=`  | Filter by capacity    |
+| **GET**    | `/api/member1/resources/filter/by-status?status=`      | Filter by status      |
+| **GET**    | `/api/member1/resources/suggestions/locations?prefix=` | Location autocomplete |
+| **PUT**    | `/api/member1/resources/{id}`                          | Update resource       |
+| **PATCH**  | `/api/member1/resources/{id}/status?status=`           | Change status         |
+| **DELETE** | `/api/member1/resources/{id}`                          | Delete resource       |
 
 ---
 
@@ -76,6 +81,7 @@ Go to: **http://localhost:5173**
 ### Test with PowerShell
 
 **Create Resource:**
+
 ```powershell
 $headers = @{ "Authorization" = "Bearer YOUR_TOKEN" }
 $body = @{
@@ -91,6 +97,7 @@ Invoke-RestMethod -Uri "http://localhost:8080/api/member1/resources" `
 ```
 
 **List Resources:**
+
 ```powershell
 $headers = @{ "Authorization" = "Bearer YOUR_TOKEN" }
 Invoke-RestMethod -Uri "http://localhost:8080/api/member1/resources?page=0&size=10" `
@@ -98,6 +105,7 @@ Invoke-RestMethod -Uri "http://localhost:8080/api/member1/resources?page=0&size=
 ```
 
 **Search:**
+
 ```powershell
 Invoke-RestMethod -Uri "http://localhost:8080/api/member1/resources/search?term=lecture" `
     -Method GET -Headers $headers | ConvertTo-Json
@@ -153,9 +161,11 @@ PAF-Assignment/
 ## 🛠️ Configuration
 
 ### Backend Database
+
 **File:** `backend/src/main/resources/application.properties`
 
 Default:
+
 ```properties
 spring.datasource.url=jdbc:mysql://localhost:3306/smartcampus_db
 spring.datasource.username=root
@@ -164,10 +174,11 @@ server.port=8080
 ```
 
 ### Frontend API Base
+
 **File:** `frontend/src/services/memberOneResourceService.js`
 
 ```javascript
-const BASE_URL = 'http://localhost:8080/api/member1/resources';
+const BASE_URL = "http://localhost:8080/api/member1/resources";
 ```
 
 ---
@@ -192,16 +203,16 @@ After startup, verify:
 
 ## 🐛 Troubleshooting
 
-| Error | Solution |
-|-------|----------|
-| Port 8080 in use | Change `server.port` in `application.properties` |
-| Port 5173 in use | Run `npm run dev -- --port 3000` |
-| DB connection error | Check MySQL running, verify credentials |
-| Java not found | Install Java 21+ and add to PATH |
-| Maven not found | Install Maven 3.9.8+ and add to PATH |
-| npm not working | Install Node.js 18+ and npm 9+ |
-| API 404 errors | Ensure backend on 8080, check URL |
-| CORS errors | Verify CORS config in `SecurityConfig.java` |
+| Error               | Solution                                         |
+| ------------------- | ------------------------------------------------ |
+| Port 8080 in use    | Change `server.port` in `application.properties` |
+| Port 5173 in use    | Run `npm run dev -- --port 3000`                 |
+| DB connection error | Check MySQL running, verify credentials          |
+| Java not found      | Install Java 21+ and add to PATH                 |
+| Maven not found     | Install Maven 3.9.8+ and add to PATH             |
+| npm not working     | Install Node.js 18+ and npm 9+                   |
+| API 404 errors      | Ensure backend on 8080, check URL                |
+| CORS errors         | Verify CORS config in `SecurityConfig.java`      |
 
 ---
 
