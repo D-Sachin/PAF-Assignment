@@ -12,6 +12,11 @@ const FileUpload = ({ files, setFiles, maxFiles = 3 }) => {
   const addFiles = (newFiles) => {
     const validFiles = newFiles.filter(file => file.type.startsWith('image/'));
     
+    // Create preview URLs to avoid memory leaks or regenerating on render
+    validFiles.forEach(file => {
+      file.preview = URL.createObjectURL(file);
+    });
+    
     if (validFiles.length < newFiles.length) {
       alert("Only image files are allowed.");
     }
@@ -31,7 +36,13 @@ const FileUpload = ({ files, setFiles, maxFiles = 3 }) => {
   };
 
   const removeFile = (indexToRemove) => {
-    setFiles((prev) => prev.filter((_, index) => index !== indexToRemove));
+    setFiles((prev) => {
+      // Revoke the object URL to free memory
+      if (prev[indexToRemove] && prev[indexToRemove].preview) {
+        URL.revokeObjectURL(prev[indexToRemove].preview);
+      }
+      return prev.filter((_, index) => index !== indexToRemove);
+    });
   };
 
   const handleDrag = (e) => {
@@ -87,20 +98,27 @@ const FileUpload = ({ files, setFiles, maxFiles = 3 }) => {
       {files.length > 0 && (
         <ul className="mt-4 grid grid-cols-1 gap-4 sm:grid-cols-2 md:grid-cols-3">
           {files.map((file, index) => (
-            <li key={index} className="relative rounded-md shadow-sm border border-gray-200 bg-white p-2 flex items-center justify-between">
-              <div className="flex items-center truncate">
-                <span className="truncate text-sm font-medium text-gray-900">{file.name}</span>
+            <li key={index} className="relative rounded-lg shadow-sm border border-gray-200 bg-white p-3 flex flex-col justify-between items-center group overflow-hidden">
+              <div className="w-full h-32 mb-3 bg-gray-100 rounded flex items-center justify-center overflow-hidden">
+                <img 
+                  src={file.preview || URL.createObjectURL(file)} 
+                  alt={file.name} 
+                  className="object-cover w-full h-full"
+                />
               </div>
-              <button
-                type="button"
-                onClick={(e) => { e.stopPropagation(); removeFile(index); }}
-                className="ml-2 inline-flex flex-shrink-0 items-center justify-center h-6 w-6 rounded-full text-gray-400 hover:bg-gray-100 hover:text-red-500 focus:outline-none focus:ring-2 focus:ring-indigo-500 focus:ring-offset-2"
-              >
-                <span className="sr-only">Remove file</span>
-                <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
-                </svg>
-              </button>
+              <div className="flex items-center justify-between w-full">
+                <span className="truncate text-xs font-medium text-gray-700 block w-full pr-2" title={file.name}>{file.name}</span>
+                <button
+                  type="button"
+                  onClick={(e) => { e.stopPropagation(); removeFile(index); }}
+                  className="inline-flex flex-shrink-0 items-center justify-center h-6 w-6 rounded-full bg-red-50 text-red-500 hover:bg-red-100 hover:text-red-600 focus:outline-none"
+                  aria-label="Remove file"
+                >
+                  <svg className="h-4 w-4" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M6 18L18 6M6 6l12 12" />
+                  </svg>
+                </button>
+              </div>
             </li>
           ))}
         </ul>
