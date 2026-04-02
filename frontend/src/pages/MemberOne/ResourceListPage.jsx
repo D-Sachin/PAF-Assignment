@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Plus, AlertCircle, Loader } from "lucide-react";
 import memberOneResourceService from "../../services/memberOneResourceService";
-import MemberOneResourceCard from "../MemberOne/ResourceCard";
-import MemberOneResourceForm from "../MemberOne/ResourceForm";
-import MemberOneResourceFilterBar from "../MemberOne/FilterBar";
+import MemberOneResourceCard from "../../components/MemberOne/ResourceCard";
+import MemberOneResourceForm from "../../components/MemberOne/ResourceForm";
+import MemberOneResourceFilterBar from "../../components/MemberOne/FilterBar";
 
 /**
  * MemberOneResourceList Page - Member 1 Module
