@@ -68,16 +68,15 @@ public class TicketServiceImpl implements TicketService {
         User user = userRepository.findByEmail(email)
                 .orElseThrow(() -> new RuntimeException("Logged in user not found in database: " + email));
 
-        Ticket ticket = Ticket.builder()
-                .title(dto.getTitle())
-                .description(dto.getDescription())
-                .category(dto.getCategory())
-                .priority(dto.getPriority())
-                .status(TicketStatus.OPEN) // Default status
-                .user(user)
-                .resourceLocation(dto.getResourceLocation())
-                .preferredContactDetails(dto.getPreferredContactDetails())
-                .build();
+        Ticket ticket = new Ticket();
+        ticket.setTitle(dto.getTitle());
+        ticket.setDescription(dto.getDescription());
+        ticket.setCategory(dto.getCategory());
+        ticket.setPriority(dto.getPriority());
+        ticket.setStatus(TicketStatus.OPEN); // Default status
+        ticket.setUser(user);
+        ticket.setResourceLocation(dto.getResourceLocation());
+        ticket.setPreferredContactDetails(dto.getPreferredContactDetails());
 
         Ticket savedTicket = ticketRepository.save(ticket);
 

@@ -6,7 +6,6 @@ import com.smartcampus.hub.enums.MemberOneResourceType;
 import com.smartcampus.hub.enums.MemberOneResourceStatus;
 import com.smartcampus.hub.service.MemberOneResourceService;
 import jakarta.validation.Valid;
-import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -21,11 +20,14 @@ import java.util.Map;
 
 @RestController
 @RequestMapping("/api/member1/resources")
-@RequiredArgsConstructor
 @CrossOrigin(origins = "http://localhost:3000", allowCredentials = "true")
 public class MemberOneResourceController {
 
     private final MemberOneResourceService resourceService;
+
+    public MemberOneResourceController(MemberOneResourceService resourceService) {
+        this.resourceService = resourceService;
+    }
 
     @PostMapping
     @PreAuthorize("hasRole('ADMIN')")
