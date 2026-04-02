@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useParams, useNavigate, Link } from 'react-router-dom';
 import ticketService from '../../services/ticketService';
 import CommentSection from '../../components/Tickets/CommentSection';
+import { getPriorityColor, getStatusColor } from '../../utils/ticketUtils';
 
 const TicketDetails = () => {
   const { id } = useParams();
@@ -128,19 +129,26 @@ const TicketDetails = () => {
         </div>
         
         {/* Status Actions */}
-        <div className="flex items-center gap-3">
-          <span className="text-sm font-medium text-gray-500">Update Status:</span>
-          <select
-            value={ticket.status}
-            onChange={(e) => handleStatusChange(e.target.value)}
-            disabled={statusUpdateLoading}
-            className="block pl-3 pr-10 py-2 text-sm border border-gray-300 focus:outline-none focus:ring-indigo-500 focus:border-indigo-500 rounded-md"
-          >
-            <option value="OPEN">OPEN</option>
-            <option value="IN_PROGRESS">IN PROGRESS</option>
-            <option value="RESOLVED">RESOLVED</option>
-            <option value="CLOSED">CLOSED</option>
-          </select>
+        <div className="flex items-center gap-3 bg-gray-50 px-4 py-2 rounded-lg border border-gray-200">
+          <span className="text-sm font-medium text-gray-700">Status:</span>
+          <div className="relative">
+            <select
+              value={ticket.status}
+              onChange={(e) => handleStatusChange(e.target.value)}
+              disabled={statusUpdateLoading}
+              className={`block pl-3 pr-8 py-1.5 text-sm font-semibold border focus:outline-none focus:ring-2 focus:ring-indigo-500 rounded-md appearance-none cursor-pointer transition-colors ${getStatusColor(ticket.status)} ${statusUpdateLoading ? 'opacity-50 cursor-not-allowed' : ''}`}
+            >
+              <option value="OPEN">OPEN</option>
+              <option value="IN_PROGRESS">IN PROGRESS</option>
+              <option value="RESOLVED">RESOLVED</option>
+              <option value="CLOSED">CLOSED</option>
+            </select>
+            {statusUpdateLoading && (
+              <div className="absolute right-8 top-1/2 -translate-y-1/2">
+                <div className="animate-spin h-4 w-4 border-2 border-indigo-600 border-t-transparent rounded-full"></div>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -149,17 +157,17 @@ const TicketDetails = () => {
         {/* Main Content (Left, spans 2 cols) */}
         <div className="lg:col-span-2 space-y-8">
           {/* Ticket Info Card */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 overflow-hidden">
-            <div className="p-6">
-              <div className="flex items-center justify-between mb-4">
-                <h2 className="text-xl font-bold text-gray-900">{ticket.title}</h2>
-                <div className="flex gap-2">
-                  <span className={`px-2.5 py-1 rounded text-xs font-semibold ${ticket.priority === 'CRITICAL' ? 'bg-red-100 text-red-800' : ticket.priority === 'HIGH' ? 'bg-orange-100 text-orange-800' : ticket.priority === 'MEDIUM' ? 'bg-yellow-100 text-yellow-800' : 'bg-green-100 text-green-800'}`}>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 overflow-hidden">
+            <div className="p-6 md:p-8">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-bold text-gray-900">{ticket.title}</h2>
+                <div className="flex gap-2 shrink-0">
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold uppercase tracking-wider border ${getPriorityColor(ticket.priority)}`}>
                     {ticket.priority} Priority
                   </span>
                 </div>
               </div>
-              <div className="prose max-w-none text-gray-700">
+              <div className="prose max-w-none text-gray-700 leading-relaxed">
                 <p className="whitespace-pre-wrap">{ticket.description}</p>
               </div>
 
@@ -187,20 +195,27 @@ const TicketDetails = () => {
         {/* Sidebar Space (Right, 1 col) */}
         <div className="space-y-6">
           {/* Attributes */}
-          <div className="bg-white rounded-lg shadow-sm border border-gray-200 p-5">
-            <h3 className="font-semibold text-gray-900 mb-4 pb-2 border-b">Details</h3>
+          <div className="bg-white rounded-xl shadow-sm border border-gray-200 p-6">
+            <h3 className="font-bold text-gray-900 mb-5 pb-3 border-b flex items-center gap-2">
+              <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
+              Ticket Details
+            </h3>
             <div className="space-y-4 text-sm">
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-gray-500">Status</span>
-                <span className={`font-medium ${ticket.status === 'RESOLVED' ? 'text-green-600' : 'text-gray-900'}`}>{ticket.status?.replace('_', ' ')}</span>
+                <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${getStatusColor(ticket.status)}`}>
+                  {ticket.status?.replace('_', ' ')}
+                </span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center">
                 <span className="text-gray-500">Priority</span>
-                <span className="font-medium text-gray-900">{ticket.priority}</span>
+                <span className={`px-2 py-0.5 rounded text-xs font-semibold border ${getPriorityColor(ticket.priority)}`}>
+                  {ticket.priority}
+                </span>
               </div>
-              <div className="flex justify-between">
+              <div className="flex justify-between items-center py-2 border-t border-gray-100 mt-2">
                 <span className="text-gray-500">Created By</span>
-                <span className="font-medium text-gray-900">{ticket.createdBy?.name || 'User'}</span>
+                <span className="font-medium text-gray-900">{ticket.createdBy?.name || 'Authorized User'}</span>
               </div>
             </div>
           </div>
