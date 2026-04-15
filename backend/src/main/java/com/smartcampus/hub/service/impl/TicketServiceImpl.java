@@ -78,6 +78,14 @@ public class TicketServiceImpl implements TicketService {
 
     @Override
     @Transactional(readOnly = true)
+    public TicketResponseDTO getTicketById(Long id) {
+        Ticket ticket = ticketRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Ticket not found with id: " + id));
+        return mapToResponseDTO(ticket);
+    }
+
+    @Override
+    @Transactional(readOnly = true)
     public List<TicketResponseDTO> getTicketsByUserId(Long userId, TicketStatus status, Priority priority) {
         Specification<Ticket> spec = getTicketSpecification(userId, status, priority, null, null);
         return ticketRepository.findAll(spec).stream()
