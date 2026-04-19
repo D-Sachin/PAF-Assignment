@@ -119,7 +119,7 @@ const MyBookings = () => {
                     onClick={() => handleCancel(booking.id)}
                     className="px-4 py-2 rounded-xl bg-red-50 text-red-600 font-bold text-sm hover:bg-red-100"
                   >
-                    Delete
+                    Cancel
                   </button>
                 )}
               </div>
