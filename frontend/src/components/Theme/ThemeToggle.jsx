@@ -9,10 +9,10 @@ const ThemeToggle = ({ onClick }) => {
       type="button"
       onClick={handleClick}
       aria-label="Dark Mode"
-      className="inline-flex items-center gap-2 px-3 py-2 rounded-xl border border-slate-200 bg-white text-slate-700 text-xs font-bold uppercase tracking-wider hover:bg-slate-50 transition-all"
+      title="Dark Mode"
+      className="inline-flex items-center justify-center p-2.5 rounded-xl border border-slate-200 bg-white text-slate-700 hover:bg-slate-50 transition-all"
     >
       <Moon className="w-4 h-4" />
-      Dark Mode
     </button>
   );
 };
