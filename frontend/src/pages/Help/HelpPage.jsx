@@ -62,6 +62,19 @@ const HelpPage = () => {
     fetchMessages();
   }, [user?.role]);
 
+  useEffect(() => {
+    if (!showAddFAQModal) {
+      return;
+    }
+
+    const previousOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+
+    return () => {
+      document.body.style.overflow = previousOverflow;
+    };
+  }, [showAddFAQModal]);
+
   const handleChange = (event) => {
     const { name, value } = event.target;
     setFormData((prev) => ({
@@ -307,8 +320,17 @@ const HelpPage = () => {
           )}
 
           {showAddFAQModal && user?.role === "ADMIN" && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/50 p-4">
-              <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6 animate-fade-in-up">
+            <div
+              className="fixed inset-0 z-50 overflow-y-auto bg-black/50 px-4 py-6"
+              onMouseDown={(event) => {
+                if (event.target === event.currentTarget) {
+                  setShowAddFAQModal(false);
+                  setFAQFormError("");
+                }
+              }}
+            >
+              <div className="min-h-full flex items-center justify-center">
+                <div className="bg-white rounded-2xl shadow-xl max-w-md w-full p-6">
                 <div className="flex items-center justify-between mb-4">
                   <h3 className="text-lg font-bold text-slate-900">Add New FAQ</h3>
                   <button
@@ -316,7 +338,7 @@ const HelpPage = () => {
                       setShowAddFAQModal(false);
                       setFAQFormError("");
                     }}
-                    className="text-slate-400 hover:text-slate-600"
+                    className="text-slate-400 hover:text-slate-600 transition"
                   >
                     <X className="w-5 h-5" />
                   </button>
@@ -328,10 +350,11 @@ const HelpPage = () => {
                     <input
                       type="text"
                       name="question"
+                      autoComplete="off"
                       value={faqFormData.question}
                       onChange={handleAddFAQChange}
                       placeholder="Enter the FAQ question..."
-                      className="w-full mt-2 px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-100 text-sm font-medium outline-none focus:ring-2 focus:ring-primary-500/20"
+                      className="w-full mt-2 px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-100 text-sm font-medium outline-none focus:ring-2 focus:ring-primary-500/20 focus:bg-white transition"
                       required
                     />
                   </label>
@@ -340,11 +363,12 @@ const HelpPage = () => {
                     <span className="text-xs font-bold text-slate-500 uppercase tracking-wider">Answer</span>
                     <textarea
                       name="answer"
+                      autoComplete="off"
                       value={faqFormData.answer}
                       onChange={handleAddFAQChange}
                       placeholder="Enter the FAQ answer..."
                       rows={5}
-                      className="w-full mt-2 px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-100 text-sm font-medium outline-none focus:ring-2 focus:ring-primary-500/20 resize-none"
+                      className="w-full mt-2 px-3 py-2.5 rounded-xl bg-slate-50 border border-slate-100 text-sm font-medium outline-none focus:ring-2 focus:ring-primary-500/20 resize-none focus:bg-white transition"
                       required
                     />
                   </label>
@@ -376,6 +400,7 @@ const HelpPage = () => {
                     </button>
                   </div>
                 </form>
+              </div>
               </div>
             </div>
           )}
