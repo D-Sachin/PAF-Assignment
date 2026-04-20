@@ -79,7 +79,8 @@ public class TicketServiceImpl implements TicketService {
     @Transactional(readOnly = true)
     public List<TicketResponseDTO> getAllTickets(TicketStatus status, Priority priority, String category, String searchTerm) {
         Specification<Ticket> spec = getTicketSpecification(null, status, priority, category, searchTerm);
-        return ticketRepository.findAll(spec).stream()
+        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt");
+        return ticketRepository.findAll(spec, sort).stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
     }
@@ -96,7 +97,8 @@ public class TicketServiceImpl implements TicketService {
     @Transactional(readOnly = true)
     public List<TicketResponseDTO> getTicketsByUserId(Long userId, TicketStatus status, Priority priority) {
         Specification<Ticket> spec = getTicketSpecification(userId, status, priority, null, null);
-        return ticketRepository.findAll(spec).stream()
+        org.springframework.data.domain.Sort sort = org.springframework.data.domain.Sort.by(org.springframework.data.domain.Sort.Direction.DESC, "createdAt");
+        return ticketRepository.findAll(spec, sort).stream()
                 .map(this::mapToResponseDTO)
                 .collect(Collectors.toList());
     }
