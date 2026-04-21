@@ -6,6 +6,26 @@ import { formatBookingSlot, getBookingStatusColor } from "../../utils/bookingUti
 import { getApiErrorMessage } from "../../utils/apiError";
 import { useUser } from "../../context/UserContext";
 
+const getStatusCardClasses = (statusFilter, targetStatus) => {
+  const isActive = statusFilter === targetStatus;
+
+  if (targetStatus === "PENDING") {
+    return isActive
+      ? "ring-2 ring-amber-300 shadow-amber-100/70 scale-[1.01] status-card-active-amber"
+      : "hover:ring-1 hover:ring-amber-200";
+  }
+
+  if (targetStatus === "APPROVED") {
+    return isActive
+      ? "ring-2 ring-green-300 shadow-green-100/70 scale-[1.01] status-card-active-green"
+      : "hover:ring-1 hover:ring-green-200";
+  }
+
+  return isActive
+    ? "ring-2 ring-red-300 shadow-red-100/70 scale-[1.01] status-card-active-red"
+    : "hover:ring-1 hover:ring-red-200";
+};
+
 const AdminBookings = () => {
   const { user } = useUser();
   const [bookings, setBookings] = useState([]);
@@ -149,10 +169,7 @@ const AdminBookings = () => {
         <button
           type="button"
           onClick={() => handleCardFilter("PENDING")}
-          className={`premium-card p-6 border-l-4 border-l-amber-500 text-left transition-all hover:scale-[1.01] ${{
-            true: "ring-2 ring-amber-200",
-            false: ""
-          }[String(statusFilter === "PENDING")]}`}
+          className={`premium-card p-6 border-l-4 border-l-amber-500 text-left transition-all duration-300 hover:scale-[1.01] ${getStatusCardClasses(statusFilter, "PENDING")}`}
         >
           <div className="flex items-center justify-between">
             <div>
@@ -167,10 +184,7 @@ const AdminBookings = () => {
         <button
           type="button"
           onClick={() => handleCardFilter("APPROVED")}
-          className={`premium-card p-6 border-l-4 border-l-green-500 text-left transition-all hover:scale-[1.01] ${{
-            true: "ring-2 ring-green-200",
-            false: ""
-          }[String(statusFilter === "APPROVED")]}`}
+          className={`premium-card p-6 border-l-4 border-l-green-500 text-left transition-all duration-300 hover:scale-[1.01] ${getStatusCardClasses(statusFilter, "APPROVED")}`}
         >
           <div className="flex items-center justify-between">
             <div>
@@ -185,10 +199,7 @@ const AdminBookings = () => {
         <button
           type="button"
           onClick={() => handleCardFilter("REJECTED")}
-          className={`premium-card p-6 border-l-4 border-l-red-500 text-left transition-all hover:scale-[1.01] ${{
-            true: "ring-2 ring-red-200",
-            false: ""
-          }[String(statusFilter === "REJECTED")]}`}
+          className={`premium-card p-6 border-l-4 border-l-red-500 text-left transition-all duration-300 hover:scale-[1.01] ${getStatusCardClasses(statusFilter, "REJECTED")}`}
         >
           <div className="flex items-center justify-between">
             <div>
@@ -259,11 +270,11 @@ const AdminBookings = () => {
           <p className="text-slate-400 text-sm mt-2">Loading booking queue...</p>
         </div>
       ) : filteredBookings.length === 0 ? (
-        <div className="premium-card p-12 text-center text-slate-500">
+        <div key={`empty-${statusFilter}`} className="premium-card p-12 text-center text-slate-500 animate-booking-filter-switch">
           {searchTerm ? "No bookings match your search." : "No bookings found for selected filter."}
         </div>
       ) : (
-        <div className="grid grid-cols-1 gap-4">
+        <div key={`list-${statusFilter}`} className="grid grid-cols-1 gap-4 animate-booking-filter-switch">
           {sortedBookings.map((booking) => (
             <div key={booking.id} className="premium-card p-5 flex flex-col md:flex-row md:items-center md:justify-between gap-4">
               <div className="space-y-1">
