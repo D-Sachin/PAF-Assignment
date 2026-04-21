@@ -74,6 +74,11 @@ const AdminBookings = () => {
     }
   };
 
+  const handleCardFilter = (status) => {
+    setStatusFilter(status);
+    setSearchTerm("");
+  };
+
   if (user?.role !== "ADMIN") {
     return <Navigate to="/bookings/my" replace />;
   }
@@ -141,7 +146,14 @@ const AdminBookings = () => {
       {/* Booking Stats Cards */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
         {/* Pending Card */}
-        <div className="premium-card p-6 border-l-4 border-l-amber-500">
+        <button
+          type="button"
+          onClick={() => handleCardFilter("PENDING")}
+          className={`premium-card p-6 border-l-4 border-l-amber-500 text-left transition-all hover:scale-[1.01] ${{
+            true: "ring-2 ring-amber-200",
+            false: ""
+          }[String(statusFilter === "PENDING")]}`}
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Pending Bookings</p>
@@ -149,10 +161,17 @@ const AdminBookings = () => {
             </div>
             <Clock className="w-12 h-12 text-amber-200" />
           </div>
-        </div>
+        </button>
 
         {/* Approved Card */}
-        <div className="premium-card p-6 border-l-4 border-l-green-500">
+        <button
+          type="button"
+          onClick={() => handleCardFilter("APPROVED")}
+          className={`premium-card p-6 border-l-4 border-l-green-500 text-left transition-all hover:scale-[1.01] ${{
+            true: "ring-2 ring-green-200",
+            false: ""
+          }[String(statusFilter === "APPROVED")]}`}
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Approved Bookings</p>
@@ -160,10 +179,17 @@ const AdminBookings = () => {
             </div>
             <CheckCircle2 className="w-12 h-12 text-green-200" />
           </div>
-        </div>
+        </button>
 
         {/* Rejected Card */}
-        <div className="premium-card p-6 border-l-4 border-l-red-500">
+        <button
+          type="button"
+          onClick={() => handleCardFilter("REJECTED")}
+          className={`premium-card p-6 border-l-4 border-l-red-500 text-left transition-all hover:scale-[1.01] ${{
+            true: "ring-2 ring-red-200",
+            false: ""
+          }[String(statusFilter === "REJECTED")]}`}
+        >
           <div className="flex items-center justify-between">
             <div>
               <p className="text-xs font-bold text-slate-500 uppercase tracking-widest">Rejected Bookings</p>
@@ -171,7 +197,7 @@ const AdminBookings = () => {
             </div>
             <XCircle className="w-12 h-12 text-red-200" />
           </div>
-        </div>
+        </button>
       </div>
 
       <div className="premium-card p-4 grid grid-cols-1 lg:grid-cols-4 gap-4">
