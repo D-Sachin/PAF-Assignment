@@ -39,8 +39,9 @@ public class TicketController {
             @RequestParam(required = false) TicketStatus status,
             @RequestParam(required = false) Priority priority,
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) String searchTerm) {
-        List<TicketResponseDTO> tickets = ticketService.getAllTickets(status, priority, category, searchTerm);
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(required = false) Long technicianId) {
+        List<TicketResponseDTO> tickets = ticketService.getAllTickets(status, priority, category, searchTerm, technicianId);
         return ResponseEntity.ok(tickets);
     }
 
@@ -55,6 +56,13 @@ public class TicketController {
             @RequestParam(required = false) Priority priority) {
         List<TicketResponseDTO> tickets = ticketService.getTicketsByUserId(userId, status, priority);
         return ResponseEntity.ok(tickets);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<TicketResponseDTO> updateTicket(
+            @PathVariable Long id,
+            @Valid @RequestBody TicketRequestDTO ticketRequestDTO) {
+        return ResponseEntity.ok(ticketService.updateTicket(id, ticketRequestDTO));
     }
 
     @PutMapping("/{id}/status")
@@ -86,11 +94,33 @@ public class TicketController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/{ticketId}/attachments/{attachmentId}")
+    public ResponseEntity<Void> deleteAttachment(
+            @PathVariable Long ticketId,
+            @PathVariable Long attachmentId) {
+        ticketService.deleteAttachment(attachmentId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{id}/comments")
     public ResponseEntity<List<CommentResponseDTO>> addComment(
             @PathVariable Long id,
             @Valid @RequestBody CommentRequestDTO commentRequestDTO) {
         List<CommentResponseDTO> comments = ticketService.addComment(id, commentRequestDTO);
         return ResponseEntity.ok(comments);
+    }
+
+    @PutMapping("/comments/{commentId}")
+    public ResponseEntity<Void> updateComment(
+            @PathVariable Long commentId,
+            @Valid @RequestBody CommentRequestDTO commentRequestDTO) {
+        ticketService.updateComment(commentId, commentRequestDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
+        ticketService.deleteComment(commentId);
+        return ResponseEntity.noContent().build();
     }
 }
