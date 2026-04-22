@@ -16,6 +16,7 @@ const ticketService = {
         priority: params.priority,
         category: params.category,
         searchTerm: params.searchTerm,
+        technicianId: params.technicianId,
       },
     });
   },
@@ -94,6 +95,21 @@ const ticketService = {
     return apiClient.get(`/files/uploads/${fileName}`, {
       responseType: "blob",
     });
+  },
+
+  // DELETE an attachment from a ticket
+  deleteAttachment: (ticketId, attachmentId) => {
+    return apiClient.delete(`${TICKETS_PATH}/${ticketId}/attachments/${attachmentId}`);
+  },
+
+  // UPDATE a comment
+  updateComment: (commentId, content) => {
+    return apiClient.put(`${TICKETS_PATH}/comments/${commentId}`, { content });
+  },
+
+  // DELETE a comment
+  deleteComment: (commentId) => {
+    return apiClient.delete(`${TICKETS_PATH}/comments/${commentId}`);
   },
 };
 

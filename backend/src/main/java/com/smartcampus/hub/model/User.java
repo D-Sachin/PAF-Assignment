@@ -27,6 +27,12 @@ public class User {
     @Column(nullable = true)
     private String password;
 
+    @Column(nullable = true)
+    private String twoFactorSecret;
+
+    @Column(columnDefinition = "boolean default false")
+    private boolean twoFactorEnabled = false;
+
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude

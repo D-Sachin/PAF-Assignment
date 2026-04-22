@@ -39,8 +39,9 @@ public class TicketController {
             @RequestParam(required = false) TicketStatus status,
             @RequestParam(required = false) Priority priority,
             @RequestParam(required = false) String category,
-            @RequestParam(required = false) String searchTerm) {
-        List<TicketResponseDTO> tickets = ticketService.getAllTickets(status, priority, category, searchTerm);
+            @RequestParam(required = false) String searchTerm,
+            @RequestParam(required = false) Long technicianId) {
+        List<TicketResponseDTO> tickets = ticketService.getAllTickets(status, priority, category, searchTerm, technicianId);
         return ResponseEntity.ok(tickets);
     }
 
@@ -57,10 +58,25 @@ public class TicketController {
         return ResponseEntity.ok(tickets);
     }
 
+    @PutMapping("/{id}")
+    public ResponseEntity<TicketResponseDTO> updateTicket(
+            @PathVariable Long id,
+            @Valid @RequestBody TicketRequestDTO ticketRequestDTO) {
+        return ResponseEntity.ok(ticketService.updateTicket(id, ticketRequestDTO));
+    }
+
     @PutMapping("/{id}/status")
     public ResponseEntity<TicketResponseDTO> updateTicketStatus(
             @PathVariable Long id,
             @Valid @RequestBody StatusUpdateDTO statusUpdateDTO) {
+        try {
+            java.nio.file.Files.writeString(
+                java.nio.file.Paths.get("debug_controller.log"), 
+                "Received status update request for ticket " + id + " to " + statusUpdateDTO.getStatus() + "\n", 
+                java.nio.file.StandardOpenOption.CREATE, java.nio.file.StandardOpenOption.APPEND
+            );
+        } catch (Exception e) {}
+        
         TicketResponseDTO updatedTicket = ticketService.updateTicketStatus(id, statusUpdateDTO.getStatus());
         return ResponseEntity.ok(updatedTicket);
     }
@@ -86,11 +102,33 @@ public class TicketController {
         return ResponseEntity.ok(response);
     }
 
+    @DeleteMapping("/{ticketId}/attachments/{attachmentId}")
+    public ResponseEntity<Void> deleteAttachment(
+            @PathVariable Long ticketId,
+            @PathVariable Long attachmentId) {
+        ticketService.deleteAttachment(attachmentId);
+        return ResponseEntity.noContent().build();
+    }
+
     @PostMapping("/{id}/comments")
     public ResponseEntity<List<CommentResponseDTO>> addComment(
             @PathVariable Long id,
             @Valid @RequestBody CommentRequestDTO commentRequestDTO) {
         List<CommentResponseDTO> comments = ticketService.addComment(id, commentRequestDTO);
         return ResponseEntity.ok(comments);
+    }
+
+    @PutMapping("/comments/{commentId}")
+    public ResponseEntity<Void> updateComment(
+            @PathVariable Long commentId,
+            @Valid @RequestBody CommentRequestDTO commentRequestDTO) {
+        ticketService.updateComment(commentId, commentRequestDTO);
+        return ResponseEntity.ok().build();
+    }
+
+    @DeleteMapping("/comments/{commentId}")
+    public ResponseEntity<Void> deleteComment(@PathVariable Long commentId) {
+        ticketService.deleteComment(commentId);
+        return ResponseEntity.noContent().build();
     }
 }

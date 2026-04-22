@@ -19,7 +19,6 @@ import CreateBooking from "./pages/Bookings/CreateBooking";
 import MyBookings from "./pages/Bookings/MyBookings";
 import AdminBookings from "./pages/Bookings/AdminBookings";
 import BookingDetails from "./pages/Bookings/BookingDetails";
-import SettingsPage from "./pages/Admin/SettingsPage";
 
 const AppLayout = () => {
   const { isAuthenticated } = useUser();
@@ -70,14 +69,6 @@ function App() {
           />
           <Route path="bookings/:id" element={<BookingDetails />} />
           <Route path="help" element={<HelpPage />} />
-          <Route
-            path="settings"
-            element={
-              <ProtectedRoute allowedRoles={["ADMIN"]} redirectTo="/">
-                <SettingsPage />
-              </ProtectedRoute>
-            }
-          />
 
           {/* Redirect unknown routes */}
           <Route path="*" element={<Navigate to="/" replace />} />
