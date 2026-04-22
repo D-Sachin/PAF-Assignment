@@ -12,7 +12,8 @@ import {
   Wrench,
   Box,
   CheckCircle2,
-  AlertTriangle
+  AlertTriangle,
+  BookOpen
 } from "lucide-react";
 
 /**
@@ -123,7 +124,7 @@ const ResourceCard = ({ resource, onEdit, onDelete, canEdit }) => {
       </div>
 
       {/* Footer Actions */}
-      {canEdit && (
+      {canEdit ? (
         <div className="flex items-center justify-end gap-2 pt-4 opacity-0 group-hover:opacity-100 transition-opacity translate-y-2 group-hover:translate-y-0 transition-transform" style={{ borderTop: '1px solid #4A5C6A' }}>
           <button
             onClick={() => onEdit(resource)}
@@ -144,6 +145,29 @@ const ResourceCard = ({ resource, onEdit, onDelete, canEdit }) => {
             title="Delete Resource"
           >
             <Trash2 className="w-4 h-4" />
+          </button>
+        </div>
+      ) : (
+        <div className="pt-4" style={{ borderTop: '1px solid #4A5C6A' }}>
+          <button
+            disabled={resource.status !== "ACTIVE"}
+            className="w-full py-2 px-4 rounded-lg font-bold text-sm flex items-center justify-center gap-2 transition-all disabled:opacity-50 disabled:cursor-not-allowed"
+            style={{ 
+              backgroundColor: resource.status === "ACTIVE" ? '#1c4f78' : '#4A5C6A',
+              color: '#CCD0CF'
+            }}
+            onMouseEnter={e => { 
+              if (resource.status === "ACTIVE") {
+                e.currentTarget.style.backgroundColor = '#2d70a3';
+              }
+            }}
+            onMouseLeave={e => { 
+              e.currentTarget.style.backgroundColor = resource.status === "ACTIVE" ? '#1c4f78' : '#4A5C6A';
+            }}
+            title={resource.status !== "ACTIVE" ? "This resource is currently unavailable" : "Click to book this resource"}
+          >
+            <BookOpen className="w-4 h-4" />
+            {resource.status === "ACTIVE" ? "Book Now" : "Unavailable"}
           </button>
         </div>
       )}
