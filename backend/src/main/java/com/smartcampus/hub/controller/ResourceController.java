@@ -110,6 +110,17 @@ public class ResourceController {
         return ResponseEntity.ok(result);
     }
 
+    /**
+     * Advanced search with multiple filter parameters
+     * @param type Resource type filter (optional)
+     * @param status Resource status filter (optional)
+     * @param location Location filter (optional, case-insensitive)
+     * @param minCapacity Minimum capacity filter (optional)
+     * @param maxCapacity Maximum capacity filter (optional)
+     * @param term Search term for resource name/description (optional)
+     * @param pageable Pagination parameters
+     * @return Paginated list of resources matching all filters
+     */
     @GetMapping("/advanced-search")
     public ResponseEntity<Map<String, Object>> advancedSearch(
             @RequestParam(required = false) String type,
@@ -149,6 +160,12 @@ public class ResourceController {
     }
     }
 
+    /**
+     * Filter resources by type
+     * @param type Resource type to filter (LECTURE_HALL, LAB, MEETING_ROOM, EQUIPMENT)
+     * @param pageable Pagination parameters
+     * @return Paginated list of resources of specified type
+     */
     @GetMapping("/filter/by-type")
     public ResponseEntity<Map<String, Object>> filterByType(
             @RequestParam ResourceType type,
