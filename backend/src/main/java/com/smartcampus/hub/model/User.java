@@ -31,8 +31,7 @@ public class User {
     private String twoFactorSecret;
 
     @Column(name = "two_factor_enabled")
-    @Builder.Default
-    private boolean twoFactorEnabled = false;
+    private Boolean twoFactorEnabled;
     @OneToMany(mappedBy = "user", cascade = CascadeType.ALL, orphanRemoval = true)
     @ToString.Exclude
     @EqualsAndHashCode.Exclude
