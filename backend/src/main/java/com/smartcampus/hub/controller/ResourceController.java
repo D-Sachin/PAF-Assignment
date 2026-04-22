@@ -120,25 +120,33 @@ public class ResourceController {
             @RequestParam(required = false) String term,
             @PageableDefault(size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable) {
         
-        // Convert empty strings to null for optional enums
-        ResourceType resourceType = (type == null || type.isEmpty()) ? null : ResourceType.valueOf(type);
-        ResourceStatus resourceStatus = (status == null || status.isEmpty()) ? null : ResourceStatus.valueOf(status);
-        location = (location != null && location.isEmpty()) ? null : location;
-        
-        Page<ResourceResponseDTO> page = resourceService.advancedSearch(
-                resourceType, resourceStatus, location, minCapacity, maxCapacity, term, pageable);
-        Map<String, Object> paginationMap = new HashMap<>();
-        paginationMap.put("currentPage", page.getNumber());
-        paginationMap.put("totalPages", page.getTotalPages());
-        paginationMap.put("totalElements", page.getTotalElements());
-        paginationMap.put("pageSize", page.getSize());
-        
-        Map<String, Object> result = new HashMap<>();
-        result.put("success", true);
-        result.put("message", "Advanced search completed successfully");
-        result.put("data", page.getContent());
-        result.put("pagination", paginationMap);
-        return ResponseEntity.ok(result);
+        try {
+            // Convert empty strings to null for optional enums
+            ResourceType resourceType = (type == null || type.isEmpty()) ? null : ResourceType.valueOf(type);
+            ResourceStatus resourceStatus = (status == null || status.isEmpty()) ? null : ResourceStatus.valueOf(status);
+            location = (location != null && location.isEmpty()) ? null : location;
+            
+            Page<ResourceResponseDTO> page = resourceService.advancedSearch(
+                    resourceType, resourceStatus, location, minCapacity, maxCapacity, term, pageable);
+            Map<String, Object> paginationMap = new HashMap<>();
+            paginationMap.put("currentPage", page.getNumber());
+            paginationMap.put("totalPages", page.getTotalPages());
+            paginationMap.put("totalElements", page.getTotalElements());
+            paginationMap.put("pageSize", page.getSize());
+            
+            Map<String, Object> result = new HashMap<>();
+            result.put("success", true);
+            result.put("message", "Advanced search completed successfully");
+            result.put("data", page.getContent());
+            result.put("pagination", paginationMap);
+            return ResponseEntity.ok(result);
+        } catch (IllegalArgumentException e) {
+            Map<String, Object> error = new HashMap<>();
+            error.put("success", false);
+            error.put("message", "Invalid filter parameter: " + e.getMessage());
+            return ResponseEntity.badRequest().body(error);
+        }
+    }
     }
 
     @GetMapping("/filter/by-type")
