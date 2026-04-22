@@ -27,7 +27,8 @@ const bookingService = {
 
   cancelBooking: (id) => apiClient.put(`/bookings/${id}/cancel`),
 
-  deleteBooking: (id) => apiClient.delete(`/bookings/${id}`),
+  // UI-level delete behavior is mapped to cancel based on project decision.
+  deleteBooking: (id) => apiClient.put(`/bookings/${id}/cancel`),
 };
 
 export default bookingService;
