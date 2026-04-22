@@ -83,7 +83,7 @@ const TicketForm = ({ onSubmit, onCancel, isLoading }) => {
       style={{ backgroundColor: 'rgba(6, 20, 27, 0.85)' }}
     >
       <div 
-        className="relative rounded-[32px] shadow-2xl w-full max-w-4xl min-h-fit max-h-none flex flex-col animate-scale-in overflow-hidden my-auto"
+        className="relative rounded-[32px] shadow-2xl w-full max-w-6xl min-h-fit max-h-none flex flex-col animate-scale-in overflow-hidden my-auto"
         style={{ backgroundColor: '#11212D', border: '1px solid #253745' }}
       >
         {/* Header */}
@@ -124,9 +124,9 @@ const TicketForm = ({ onSubmit, onCancel, isLoading }) => {
             </div>
           )}
 
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-12">
+          <div className="grid grid-cols-1 lg:grid-cols-4 gap-12">
             {/* Fields */}
-            <div className="lg:col-span-2 space-y-10">
+            <div className="lg:col-span-3 space-y-10">
               <div className="space-y-8">
                 <div className="space-y-3">
                   <label className="text-[11px] font-bold uppercase tracking-[0.2em] flex items-center gap-2" style={{ color: '#9BA8AB' }}>
@@ -139,7 +139,7 @@ const TicketForm = ({ onSubmit, onCancel, isLoading }) => {
                     onChange={handleInputChange}
                     disabled={isLoading}
                     placeholder="e.g., Water leakage in Room 402"
-                    className="w-full px-6 py-4.5 rounded-2xl outline-none transition-all font-bold"
+                    className="w-full px-6 py-5 rounded-2xl outline-none transition-all font-bold"
                     style={{ backgroundColor: '#06141B', border: '1px solid #253745', color: '#CCD0CF' }}
                     onFocus={e => e.currentTarget.style.borderColor = '#2d70a3'}
                     onBlur={e => e.currentTarget.style.borderColor = '#253745'}
@@ -157,7 +157,7 @@ const TicketForm = ({ onSubmit, onCancel, isLoading }) => {
                         value={formData.priority}
                         onChange={handleInputChange}
                         disabled={isLoading}
-                        className="w-full px-6 py-4.5 rounded-2xl outline-none transition-all font-bold appearance-none cursor-pointer"
+                        className="w-full px-6 py-5 rounded-2xl outline-none transition-all font-bold appearance-none cursor-pointer"
                         style={{ backgroundColor: '#06141B', border: '1px solid #253745', color: '#CCD0CF' }}
                         onFocus={e => e.currentTarget.style.borderColor = '#2d70a3'}
                         onBlur={e => e.currentTarget.style.borderColor = '#253745'}
@@ -182,7 +182,7 @@ const TicketForm = ({ onSubmit, onCancel, isLoading }) => {
                       onChange={handleInputChange}
                       disabled={isLoading}
                       placeholder="e.g., Block B, Lab 402"
-                      className="w-full px-6 py-4.5 rounded-2xl outline-none transition-all font-bold"
+                      className="w-full px-6 py-5 rounded-2xl outline-none transition-all font-bold"
                       style={{ backgroundColor: '#06141B', border: '1px solid #253745', color: '#CCD0CF' }}
                       onFocus={e => e.currentTarget.style.borderColor = '#2d70a3'}
                       onBlur={e => e.currentTarget.style.borderColor = '#253745'}
@@ -200,7 +200,7 @@ const TicketForm = ({ onSubmit, onCancel, isLoading }) => {
                       onChange={handleInputChange}
                       disabled={isLoading}
                       placeholder="e.g., +94 77 123 4567"
-                      className="w-full px-6 py-4.5 rounded-2xl outline-none transition-all font-bold"
+                      className="w-full px-6 py-5 rounded-2xl outline-none transition-all font-bold"
                       style={{ backgroundColor: '#06141B', border: '1px solid #253745', color: '#CCD0CF' }}
                       onFocus={e => e.currentTarget.style.borderColor = '#2d70a3'}
                       onBlur={e => e.currentTarget.style.borderColor = '#253745'}
@@ -217,7 +217,7 @@ const TicketForm = ({ onSubmit, onCancel, isLoading }) => {
                         value={formData.category}
                         onChange={handleInputChange}
                         disabled={isLoading}
-                        className="w-full px-6 py-4.5 rounded-2xl outline-none transition-all font-bold appearance-none cursor-pointer"
+                        className="w-full px-6 py-5 rounded-2xl outline-none transition-all font-bold appearance-none cursor-pointer"
                         style={{ backgroundColor: '#06141B', border: '1px solid #253745', color: '#CCD0CF' }}
                         onFocus={e => e.currentTarget.style.borderColor = '#2d70a3'}
                         onBlur={e => e.currentTarget.style.borderColor = '#253745'}
@@ -331,7 +331,7 @@ const TicketForm = ({ onSubmit, onCancel, isLoading }) => {
             <button
               type="submit"
               disabled={isLoading}
-              className="premium-button min-w-[240px] py-4.5 flex items-center justify-center gap-3 text-sm font-bold group shadow-xl"
+              className="premium-button min-w-[240px] py-5 flex items-center justify-center gap-3 text-sm font-bold group shadow-xl"
               style={{ backgroundColor: '#1c4f78', color: '#CCD0CF', boxShadow: '0 8px 24px rgba(6, 20, 27, 0.4)' }}
             >
               {isLoading ? (
