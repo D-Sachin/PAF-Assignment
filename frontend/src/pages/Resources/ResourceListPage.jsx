@@ -30,6 +30,16 @@ const ResourceList = () => {
   const [totalPages, setTotalPages] = useState(0);
   const [pageSize, setPageSize] = useState(10);
 
+  // Search and filter state
+  const [searchTerm, setSearchTerm] = useState("");
+  const [activeFilters, setActiveFilters] = useState({
+    type: "",
+    status: "",
+    location: "",
+    minCapacity: "",
+    maxCapacity: "",
+  });
+
   // Form state
   const [showForm, setShowForm] = useState(false);
   const [editingResource, setEditingResource] = useState(null);
@@ -70,8 +80,14 @@ const ResourceList = () => {
     setLoading(true);
     setError("");
     setCurrentPage(0);
+    setSearchTerm(term);
     try {
-      const response = await resourceService.searchResources(term, 0, pageSize);
+      // Use advanced search with both term and current filters
+      const response = await resourceService.advancedSearch(
+        { ...activeFilters, term },
+        0,
+        pageSize,
+      );
       setResources(response.data.data);
       setTotalPages(response.data.pagination.totalPages);
     } catch (err) {
@@ -86,9 +102,11 @@ const ResourceList = () => {
     setLoading(true);
     setError("");
     setCurrentPage(0);
+    setActiveFilters(filters);
     try {
+      // Use advanced search with both filters and current search term
       const response = await resourceService.advancedSearch(
-        filters,
+        { ...filters, term: searchTerm },
         0,
         pageSize,
       );
