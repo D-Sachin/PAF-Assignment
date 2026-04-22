@@ -41,7 +41,14 @@ const ResourceList = () => {
         currentPage,
         pageSize,
       );
-      setResources(response.data.data);
+      let data = response.data.data;
+      
+      // For non-admin users, filter to show only ACTIVE resources
+      if (!isAdmin) {
+        data = data.filter(resource => resource.status === 'ACTIVE');
+      }
+      
+      setResources(data);
       setTotalPages(response.data.pagination.totalPages);
     } catch (err) {
       setError("Failed to load resources. Please try again.");
@@ -154,8 +161,14 @@ const ResourceList = () => {
       {/* Header Section */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold" style={{ color: '#CCD0CF' }}>Campus Resources</h1>
-          <p className="mt-1 font-medium text-sm" style={{ color: '#9BA8AB' }}>Manage facilities, laboratories, and operational equipment catalogue.</p>
+          <h1 className="text-3xl font-bold" style={{ color: '#CCD0CF' }}>
+            {isAdmin ? "Campus Resources Management" : "Available Campus Resources"}
+          </h1>
+          <p className="mt-1 font-medium text-sm" style={{ color: '#9BA8AB' }}>
+            {isAdmin 
+              ? "Manage facilities, laboratories, and operational equipment catalogue."
+              : "Browse and book available resources for your campus needs."}
+          </p>
         </div>
         <div className="flex items-center gap-3">
           {isAdmin && (
@@ -172,12 +185,14 @@ const ResourceList = () => {
         </div>
       </div>
 
-      {/* Filter Bar */}
-      <ResourceFilterBar
-        onFilter={handleFilter}
-        onSearch={handleSearch}
-        isLoading={loading}
-      />
+      {/* Filter Bar - Admin Only */}
+      {isAdmin && (
+        <ResourceFilterBar
+          onFilter={handleFilter}
+          onSearch={handleSearch}
+          isLoading={loading}
+        />
+      )}
 
       {/* Messages */}
       {success && (
