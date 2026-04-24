@@ -650,4 +650,38 @@ public class TicketServiceImpl implements TicketService {
                 .createdAt(comment.getCreatedAt())
                 .build();
     }
+
+    @Override
+    public TechnicianStatsDTO getTechnicianStats(Long technicianId) {
+        if (technicianId == null) {
+            throw new IllegalArgumentException("Technician ID cannot be null");
+        }
+        
+        User tech = userRepository.findById(technicianId)
+                .orElseThrow(() -> new RuntimeException("Technician not found with id: " + technicianId));
+        
+        List<Ticket> tickets = ticketRepository.findByTechnician(tech);
+
+        long total = tickets.size();
+        long resolved = tickets.stream().filter(t -> t.getStatus() == TicketStatus.RESOLVED).count();
+        long inProgress = tickets.stream().filter(t -> t.getStatus() == TicketStatus.IN_PROGRESS).count();
+        long open = tickets.stream().filter(t -> t.getStatus() == TicketStatus.OPEN).count();
+
+        double resolutionRate = total > 0 ? (double) resolved / total * 100 : 0.0;
+
+        double avgResolutionTime = tickets.stream()
+                .filter(t -> t.getCreatedAt() != null && t.getResolvedAt() != null)
+                .mapToLong(t -> java.time.Duration.between(t.getCreatedAt(), t.getResolvedAt()).toMinutes())
+                .average()
+                .orElse(0.0) / 60.0;
+
+        return TechnicianStatsDTO.builder()
+                .totalAssigned(total)
+                .resolvedCount(resolved)
+                .inProgressCount(inProgress)
+                .openCount(open)
+                .resolutionRate(Math.round(resolutionRate * 10.0) / 10.0)
+                .averageResolutionTimeHours(Math.round(avgResolutionTime * 10.0) / 10.0)
+                .build();
+    }
 }
