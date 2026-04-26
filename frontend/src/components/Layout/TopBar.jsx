@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
-import { Bell, Search, User, ChevronDown, Clock3, Loader2, CheckCircle2, XCircle, Wrench, MessageSquare, Ticket, CalendarCheck } from 'lucide-react';
+import { Bell, Search, User, ChevronDown, Clock3, Loader2, CheckCircle2, XCircle, Wrench, MessageSquare, Ticket, CalendarCheck, Trash2 } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useUser } from '../../context/UserContext';
 import ThemeToggle from '../Theme/ThemeToggle';
@@ -264,6 +264,19 @@ const TopBar = () => {
     }
   };
 
+  const handleDeleteNotification = async (e, id) => {
+    e.stopPropagation(); // prevent clicking the notification
+    try {
+      await notificationService.deleteNotification(id);
+      setNotifications(prev => prev.filter(n => n.id !== id));
+      // Refresh count from server
+      const response = await notificationService.getNotifications();
+      setUnreadCount(Number(response.data?.unreadCount) || 0);
+    } catch (error) {
+      setNotificationError("Failed to delete notification.");
+    }
+  };
+
   const handleApprovalPopupClose = () => {
     if (approvalRedirectTimerRef.current) {
       window.clearTimeout(approvalRedirectTimerRef.current);
@@ -421,6 +434,14 @@ const TopBar = () => {
                                 </span>
                               </div>
                             </div>
+                            {/* Delete Button */}
+                            <button
+                              onClick={(e) => handleDeleteNotification(e, n.id)}
+                              className="shrink-0 p-1.5 rounded-lg opacity-0 group-hover:opacity-100 transition-all hover:bg-red-500/10 text-[#4A5C6A] hover:text-red-500"
+                              title="Delete"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </button>
                           </div>
                         </div>
                         );
