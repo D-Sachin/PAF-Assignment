@@ -43,7 +43,7 @@ public class AuthController {
                     .body("Email is already taken.");
         }
 
-        String role = (request.getRole() != null && !request.getRole().isBlank()) ? request.getRole().toUpperCase() : "STUDENT";
+        String role = (request.getRole() != null && !request.getRole().isBlank()) ? request.getRole().toUpperCase() : "USER";
 
         User user = User.builder()
                 .name(request.getName())
@@ -212,7 +212,7 @@ public class AuthController {
                 user = User.builder()
                         .name(name != null ? name : "Google User")
                         .email(email)
-                        .role("STUDENT") // default role
+                        .role("USER") // default role
                         .build();
                 user = userRepository.save(user);
             }
