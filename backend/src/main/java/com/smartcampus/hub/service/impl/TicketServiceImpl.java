@@ -75,6 +75,13 @@ public class TicketServiceImpl implements TicketService {
 
         Ticket savedTicket = ticketRepository.save(ticket);
 
+        // Notify all admins that a new ticket has been submitted
+        try {
+            notificationService.createAdminTicketCreatedNotification(savedTicket);
+        } catch (Exception ex) {
+            System.err.println("Warning: could not send ticket-created notification: " + ex.getMessage());
+        }
+
         return mapToResponseDTO(savedTicket);
     }
 
@@ -211,13 +218,47 @@ public class TicketServiceImpl implements TicketService {
 
         Ticket updatedTicket = ticketRepository.save(ticket);
 
-        // Notify user about status change
-        notificationService.createTicketNotification(
-            ticket.getUser(),
-            "Ticket Updated",
-            "Ticket status updated to " + status + " for ticket #" + id,
-            id
-        );
+        // Notify ticket owner with a rich, status-specific message
+        try {
+            String notifTitle;
+            String notifMessage;
+            switch (status) {
+                case IN_PROGRESS ->
+                    notifTitle = "Ticket In Progress";
+                    notifMessage = String.format(
+                        "Your ticket [#%d] '%s' is now being worked on%s.",
+                        id, ticket.getTitle(),
+                        ticket.getTechnician() != null ? " by " + ticket.getTechnician().getName() : ""
+                    );
+                case RESOLVED ->
+                    notifTitle = "Ticket Resolved ✓";
+                    notifMessage = String.format(
+                        "Your ticket [#%d] '%s' has been resolved! Please review the resolution notes.",
+                        id, ticket.getTitle()
+                    );
+                case REJECTED ->
+                    notifTitle = "Ticket Declined";
+                    notifMessage = String.format(
+                        "Your ticket [#%d] '%s' has been declined. Please contact support if you have questions.",
+                        id, ticket.getTitle()
+                    );
+                case CLOSED ->
+                    notifTitle = "Ticket Closed";
+                    notifMessage = String.format(
+                        "Your ticket [#%d] '%s' has been officially closed.",
+                        id, ticket.getTitle()
+                    );
+                default ->
+                    notifTitle = "Ticket Updated";
+                    notifMessage = String.format(
+                        "Ticket [#%d] '%s' status updated to %s.",
+                        id, ticket.getTitle(), status
+                    );
+            }
+            notificationService.createTicketNotification(ticket.getUser(), notifTitle, notifMessage, id);
+        } catch (Exception ex) {
+            System.err.println("Warning: could not send ticket-status notification: " + ex.getMessage());
+        }
 
         return mapToResponseDTO(updatedTicket);
     }
@@ -264,6 +305,14 @@ public class TicketServiceImpl implements TicketService {
         }
 
         Ticket savedTicket = ticketRepository.save(ticket);
+
+        // Notify the assigned technician
+        try {
+            notificationService.createTechnicianAssignedNotification(technician, savedTicket);
+        } catch (Exception ex) {
+            System.err.println("Warning: could not send technician-assigned notification: " + ex.getMessage());
+        }
+
         return mapToResponseDTO(savedTicket);
     }
 
@@ -377,6 +426,13 @@ public class TicketServiceImpl implements TicketService {
                 .build();
 
         commentRepository.save(comment);
+
+        // Notify ticket owner (unless they are the commenter)
+        try {
+            notificationService.createCommentNotification(ticket.getUser(), ticket, user);
+        } catch (Exception ex) {
+            System.err.println("Warning: could not send comment notification: " + ex.getMessage());
+        }
 
         // Return updated comment list
         return commentRepository.findByTicket(ticket).stream()
