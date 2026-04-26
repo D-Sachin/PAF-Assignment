@@ -82,60 +82,6 @@ const TopBar = () => {
     activeApprovalRef.current = activeApprovalPopup;
   }, [activeApprovalPopup]);
 
-  const fetchStudentBookingNotifications = useCallback(async () => {
-    const response = await bookingService.getMyBookings();
-    const bookings = response.data?.data || [];
-    const readMap = getStudentReadMap();
-
-    const decisionNotifications = bookings
-      .filter((booking) => booking.status === 'APPROVED' || booking.status === 'REJECTED')
-      .map((booking) => {
-        const isRejected = booking.status === 'REJECTED';
-        const reason = booking.decisionReason?.trim();
-
-        return {
-          id: `booking-${booking.id}`,
-          relatedEntityId: booking.id,
-          title: isRejected ? 'Booking Rejected' : 'Booking Approved',
-          message: isRejected
-            ? `Your booking for ${booking.resourceName} on ${booking.bookingDate} was rejected.${reason ? ` Reason: ${reason}` : ''}`
-            : `Your booking for ${booking.resourceName} on ${booking.bookingDate} was approved.`,
-          isRead: Boolean(readMap[String(booking.id)]),
-          createdAt: booking.updatedAt || booking.createdAt,
-          type: isRejected ? 'BOOKING_REJECTED' : 'BOOKING_APPROVED',
-        };
-      })
-      .sort((a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime());
-
-    const shownPopupMap = getStudentApprovalPopupShownMap();
-    const queuedIds = new Set(
-      approvalQueueRef.current
-        .map((item) => item.relatedEntityId)
-        .filter((id) => id !== null && id !== undefined)
-        .map((id) => String(id))
-    );
-
-    if (activeApprovalRef.current?.relatedEntityId !== null && activeApprovalRef.current?.relatedEntityId !== undefined) {
-      queuedIds.add(String(activeApprovalRef.current.relatedEntityId));
-    }
-
-    const newApprovalPopups = decisionNotifications.filter((item) => {
-      if (item.type !== 'BOOKING_APPROVED') {
-        return false;
-      }
-
-      const bookingId = String(item.relatedEntityId);
-      return !shownPopupMap[bookingId] && !queuedIds.has(bookingId);
-    });
-
-    if (newApprovalPopups.length > 0) {
-      setApprovalPopupQueue((prev) => [...prev, ...newApprovalPopups]);
-    }
-
-    setNotifications(decisionNotifications);
-    setUnreadCount(decisionNotifications.filter((item) => !item.isRead).length);
-  }, []);
-
   const fetchNotifications = useCallback(async ({ silent = false } = {}) => {
     if (!canUseNotifications) {
       return;
@@ -147,15 +93,34 @@ const TopBar = () => {
     setNotificationError("");
 
     try {
-      if (isAdmin || isTechnician) {
-        const response = await notificationService.getNotifications();
-        const items = response.data?.data || [];
-        const serverUnreadCount = Number(response.data?.unreadCount);
+      // All roles (ADMIN, TECHNICIAN, USER) now use the server API
+      const response = await notificationService.getNotifications();
+      const items = response.data?.data || [];
+      const serverUnreadCount = Number(response.data?.unreadCount);
 
-        setNotifications(items);
-        setUnreadCount(Number.isFinite(serverUnreadCount) ? serverUnreadCount : items.filter((item) => !item.isRead).length);
-      } else if (isStudent) {
-        await fetchStudentBookingNotifications();
+      setNotifications(items);
+      setUnreadCount(Number.isFinite(serverUnreadCount) ? serverUnreadCount : items.filter((item) => !item.isRead).length);
+
+      // Queue approval popups for students on new BOOKING_APPROVED notifications
+      if (isStudent) {
+        const shownPopupMap = getStudentApprovalPopupShownMap();
+        const queuedIds = new Set(
+          approvalQueueRef.current
+            .map((item) => item.relatedEntityId)
+            .filter((id) => id !== null && id !== undefined)
+            .map((id) => String(id))
+        );
+        if (activeApprovalRef.current?.relatedEntityId != null) {
+          queuedIds.add(String(activeApprovalRef.current.relatedEntityId));
+        }
+        const newApprovalPopups = items.filter((item) => {
+          if (item.type !== 'BOOKING_APPROVED') return false;
+          const entityId = String(item.relatedEntityId);
+          return !shownPopupMap[entityId] && !queuedIds.has(entityId);
+        });
+        if (newApprovalPopups.length > 0) {
+          setApprovalPopupQueue((prev) => [...prev, ...newApprovalPopups]);
+        }
       }
     } catch (error) {
       if (!silent) {
@@ -166,7 +131,7 @@ const TopBar = () => {
         setNotificationLoading(false);
       }
     }
-  }, [canUseNotifications, isAdmin, isStudent, fetchStudentBookingNotifications]);
+  }, [canUseNotifications, isStudent]);
 
   useEffect(() => {
     if (canUseNotifications) {
@@ -240,22 +205,13 @@ const TopBar = () => {
   const handleNotificationClick = async (notification) => {
     try {
       let nextUnreadCount = unreadCount;
-      if (!notification.isRead && (isAdmin || isTechnician)) {
+      if (!notification.isRead) {
+        // All roles mark as read via server API
         const response = await notificationService.markAsRead(notification.id);
         const serverUnreadCount = Number(response.data?.unreadCount);
         nextUnreadCount = Number.isFinite(serverUnreadCount) ? serverUnreadCount : Math.max(0, unreadCount - 1);
         setNotifications((prev) => prev.map((item) => (item.id === notification.id ? { ...item, isRead: true } : item)));
         setUnreadCount(nextUnreadCount);
-      } else if (!notification.isRead && isStudent) {
-        const readMap = getStudentReadMap();
-        const bookingId = String(notification.relatedEntityId);
-        readMap[bookingId] = true;
-        saveStudentReadMap(readMap);
-
-        setNotifications((prev) => prev.map((item) => (
-          item.id === notification.id ? { ...item, isRead: true } : item
-        )));
-        setUnreadCount((prev) => Math.max(0, prev - 1));
       }
 
       if (notification.relatedEntityId) {
@@ -282,22 +238,11 @@ const TopBar = () => {
 
   const handleMarkAllAsRead = async () => {
     try {
-      if (isAdmin || isTechnician) {
-        const response = await notificationService.markAllAsRead();
-        const serverUnreadCount = Number(response.data?.unreadCount);
-        setNotifications((prev) => prev.map((item) => ({ ...item, isRead: true })));
-        setUnreadCount(Number.isFinite(serverUnreadCount) ? serverUnreadCount : 0);
-      } else if (isStudent) {
-        const readMap = getStudentReadMap();
-        notifications.forEach((notification) => {
-          if (notification.relatedEntityId) {
-            readMap[String(notification.relatedEntityId)] = true;
-          }
-        });
-        saveStudentReadMap(readMap);
-        setNotifications((prev) => prev.map((item) => ({ ...item, isRead: true })));
-        setUnreadCount(0);
-      }
+      // All roles use server API
+      const response = await notificationService.markAllAsRead();
+      const serverUnreadCount = Number(response.data?.unreadCount);
+      setNotifications((prev) => prev.map((item) => ({ ...item, isRead: true })));
+      setUnreadCount(Number.isFinite(serverUnreadCount) ? serverUnreadCount : 0);
     } catch (error) {
       setNotificationError("Failed to mark notifications as read.");
     }
